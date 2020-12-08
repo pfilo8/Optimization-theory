@@ -1,6 +1,7 @@
 import numpy as np
 
 from gradient_methods.NewtonMethod import NewtonMethod
+from gradient_methods.BFGS import BFGS
 
 
 def f(x, y):
@@ -33,4 +34,9 @@ def f_hess(x, y):
 if __name__ == '__main__':
     newton_method = NewtonMethod(f, f_grad, f_hess)
     res = newton_method.optimize(np.array([0.1, 0.1]))
-    print(res)
+    print(f'Result: {res}. Nb of iterations: {newton_method.i}.')
+
+    bfgs = BFGS(f, f_grad)
+    res = bfgs.optimize(np.array([0.1, 0.1]), max_iter=10000)
+    print(f'Result: {res}. Nb of iterations: {bfgs.i}.')
+

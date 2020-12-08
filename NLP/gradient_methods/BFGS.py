@@ -3,8 +3,8 @@ import numpy as np
 from .utils import find_alpha
 
 
-class NewtonMethod:
-    def __init__(self, f, f_grad, f_hess):
+class BFGS:
+    def __init__(self, f, f_grad):
         """
         Newton method for search of minimum / maximum of the given function.
         :param f: Optimized function.
@@ -16,7 +16,6 @@ class NewtonMethod:
         """
         self.f = f
         self.f_grad = f_grad
-        self.f_hess = f_hess
         self.points = []
 
     def optimize(self, x0, eps=0.0001, max_iter=100):
@@ -28,11 +27,14 @@ class NewtonMethod:
         :return: Minimum / Maximum of the function
         """
         x_star = x0
+        D = np.eye(len(x0))
+        g = self.f_grad(*x_star)
+
         self.i = 0
 
         while True:
             self.points.append(x_star)
-            x_star = self.__step(self.points[-1])
+            x_star, D, g = self.__step(self.points[-1], D, g)
             self.i += 1
 
             if np.linalg.norm(x_star - self.points[-1]) < eps:
@@ -43,19 +45,27 @@ class NewtonMethod:
 
         return self.points[-1]
 
-    def __step(self, x):
+    def __step(self, x, D, g):
         """
         Gradient method step.
         """
-        d = self.__find_descent_direction_matrix(x=x, f_hess=self.f_hess)
+        d = -np.dot(D, g)
         alpha = find_alpha(x=x, f=self.f, f_grad=self.f_grad, d=d)
-        new_x = x - alpha * np.dot(d, self.f_grad(*x))
-        # print(f'Gradient norm: {np.linalg.norm(self.f_grad(*new_x))}')
-        return new_x
+        p = d * alpha
+        x = x + p
+        q = g
+        g = self.f_grad(*x)
+        q = g - q
+        C = self.__find_c(p, q, D)
+        D = D + C
+        # print(f'Gradient norm: {np.linalg.norm(g)}')
+        return x, D, g
 
     @staticmethod
-    def __find_descent_direction_matrix(x, f_hess):
+    def __find_c(p, q, D):
         """
-        Find descent direction matrix. Using Netwon method it is inversion of hessian matrix.
+        Find correction matrix for BFGS method.
         """
-        return np.linalg.inv(f_hess(*x))
+        p = p.reshape(-1, 1)
+        q = q.reshape(-1, 1)
+        return ((p @ p.T) / (p.T @ q)) - ((D @ q @ q.T @ D) / (q.T @ D @ q))
