@@ -1,3 +1,5 @@
+import time
+
 import numpy as np
 
 from gradient_methods.NewtonMethod import NewtonMethod
@@ -31,12 +33,123 @@ def f_hess(x, y):
     return np.array([[f_xx(x, y), f_xy(x, y)], [f_xy(x, y), f_yy(x, y)]])
 
 
+def g(x, y, z, t, u):
+    return x ** 4 + y ** 4 + z ** 4 + t ** 4 + u ** 4
+
+
+def g_grad(x, y, z, t, u):
+    return np.array([4 * x ** 3, 4 * y ** 3, 4 * z ** 3, 4 * t ** 3, 4 * u ** 3])
+
+
+def g_hess(x, y, z, t, u):
+    return np.array([
+        [12 * x ** 2, 0, 0, 0, 0],
+        [0, 12 * y ** 2, 0, 0, 0],
+        [0, 0, 12 * z ** 2, 0, 0],
+        [0, 0, 0, 12 * t ** 2, 0],
+        [0, 0, 0, 0, 12 * u ** 2]
+    ])
+
+
+def execute_experiment(method, starting_point, method_kwargs, optimize_kwargs={}):
+    method_initialized = method(**method_kwargs)
+    start_time = time.time()
+    res = method_initialized.optimize(starting_point, **optimize_kwargs)
+    print(f'Method: {method}.')
+    print(f'Starting point: {starting_point}.')
+    print(f'Result: {res}. Nb of iterations: {method_initialized.i}.')
+    print(f'Execution time: {time.time() - start_time}.')
+    print('-' * 60)
+
+
 if __name__ == '__main__':
-    newton_method = NewtonMethod(f, f_grad, f_hess)
-    res = newton_method.optimize(np.array([0.1, 0.1]))
-    print(f'Result: {res}. Nb of iterations: {newton_method.i}.')
+    starting_point_1 = np.array([0.1, 0.1])
+    starting_point_2 = np.array([-0.5, 0.7])
 
-    bfgs = BFGS(f, f_grad)
-    res = bfgs.optimize(np.array([0.1, 0.1]), max_iter=10000)
-    print(f'Result: {res}. Nb of iterations: {bfgs.i}.')
+    print('Function f')
+    print('*' * 100)
+    execute_experiment(
+        NewtonMethod,
+        starting_point_1,
+        method_kwargs={
+            "f": f,
+            "f_grad": f_grad,
+            "f_hess": f_hess
+        })
 
+    execute_experiment(
+        NewtonMethod,
+        starting_point_2,
+        method_kwargs={
+            "f": f,
+            "f_grad": f_grad,
+            "f_hess": f_hess
+        })
+
+    execute_experiment(
+        BFGS,
+        starting_point_1,
+        method_kwargs={
+            "f": f,
+            "f_grad": f_grad
+        },
+        optimize_kwargs={
+            "max_iter": 10000
+        })
+
+    execute_experiment(
+        BFGS,
+        starting_point_2,
+        method_kwargs={
+            "f": f,
+            "f_grad": f_grad
+        },
+        optimize_kwargs={
+            "max_iter": 10000
+        })
+
+    print('Function g')
+    print('*' * 100)
+
+    starting_point_1 = np.array([0.1, 0.1, 0.2, -0.7, 1.2])
+    starting_point_2 = np.array([-0.5, 0.7, 20.0, 1.0, -7.0])
+
+    execute_experiment(
+        NewtonMethod,
+        starting_point_1,
+        method_kwargs={
+            "f": g,
+            "f_grad": g_grad,
+            "f_hess": g_hess
+        })
+
+    execute_experiment(
+        NewtonMethod,
+        starting_point_2,
+        method_kwargs={
+            "f": g,
+            "f_grad": g_grad,
+            "f_hess": g_hess
+        })
+
+    execute_experiment(
+        BFGS,
+        starting_point_1,
+        method_kwargs={
+            "f": g,
+            "f_grad": g_grad
+        },
+        optimize_kwargs={
+            "max_iter": 10000
+        })
+
+    execute_experiment(
+        BFGS,
+        starting_point_2,
+        method_kwargs={
+            "f": g,
+            "f_grad": g_grad
+        },
+        optimize_kwargs={
+            "max_iter": 10000
+        })
