@@ -94,7 +94,7 @@ if __name__ == '__main__':
             "f_grad": f_grad
         },
         optimize_kwargs={
-            "max_iter": 10000
+            "max_iter": 1000
         })
 
     execute_experiment(
@@ -105,14 +105,14 @@ if __name__ == '__main__':
             "f_grad": f_grad
         },
         optimize_kwargs={
-            "max_iter": 10000
+            "max_iter": 1000
         })
 
     print('Function g')
     print('*' * 100)
 
     starting_point_1 = np.array([0.1, 0.1, 0.2, -0.7, 1.2])
-    starting_point_2 = np.array([-0.5, 0.7, 20.0, 1.0, -7.0])
+    starting_point_2 = np.array([-0.5, 0.7, 2.0, 1.0, -7.0])
 
     execute_experiment(
         NewtonMethod,
@@ -140,7 +140,7 @@ if __name__ == '__main__':
             "f_grad": g_grad
         },
         optimize_kwargs={
-            "max_iter": 10000
+            "max_iter": 1000
         })
 
     execute_experiment(
@@ -151,5 +151,5 @@ if __name__ == '__main__':
             "f_grad": g_grad
         },
         optimize_kwargs={
-            "max_iter": 10000
+            "max_iter": 1000
         })

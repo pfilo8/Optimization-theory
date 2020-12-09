@@ -40,7 +40,7 @@ class NewtonMethod:
             if self.i > max_iter:
                 print('Max iter limit reached.')
                 break
-
+        self.points.append(x_star)
         return self.points[-1]
 
     def __step(self, x):

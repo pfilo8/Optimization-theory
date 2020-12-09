@@ -42,7 +42,7 @@ class BFGS:
             if self.i > max_iter:
                 print('Max iter limit reached.')
                 break
-
+        self.points.append(x_star)
         return self.points[-1]
 
     def __step(self, x, D, g):
@@ -68,4 +68,6 @@ class BFGS:
         """
         p = p.reshape(-1, 1)
         q = q.reshape(-1, 1)
-        return ((p @ p.T) / (p.T @ q)) - ((D @ q @ q.T @ D) / (q.T @ D @ q))
+        r = q.T @ D @ q
+        v = p / (p.T @ q) - (D @ q) / r
+        return ((p @ p.T) / (p.T @ q)) - ((D @ q @ q.T @ D) / (q.T @ D @ q)) + r * (v @ v.T)
